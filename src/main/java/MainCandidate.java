@@ -7,9 +7,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -25,11 +23,59 @@ public class MainCandidate {
 
         mostraPercentagemDosCandidatosAndroidIosQa(candidates);
         mostraIdadeMediaCandidatosQA(candidates);
-        //TODO:mostrar o nome do estado e a quantidade de candidatos dos 2 estados com menos ocorrências
         mostraNumeroDeEstadosDistintos(candidates);
+        mostraNomeEstadoMenorOrcorrencia(candidates);
         ordenaPorOrdemAlfabetica(candidates);
         salvaComoSortedAppAcademyCandidates(candidates);
 
+    }
+
+    private static void mostraNomeEstadoMenorOrcorrencia(List<Candidate> candidates) {
+        List<String> estados = getEstados(candidates);
+        Map<String, Long> estadosGroupBy = getEstadosGroupBy(estados);
+        Map<String, Long> estadosOrdenados = ordenaEstadosAgrupados(estadosGroupBy);
+
+        int count = 1;
+
+        System.out.println("\nRank dos 2 estados com menos ocorrências:");
+
+        for (Map.Entry<String, Long> entry : estadosOrdenados.entrySet()) {
+            String key = entry.getKey();
+            Long value = entry.getValue();
+
+            if (count <= 2){
+                System.out.println(String.format("#" + count + " %s - %s candidatos", key, value));
+            }
+
+            count++;
+        }
+    }
+
+    private static Map<String, Long> ordenaEstadosAgrupados(Map<String, Long> estadosGroupBy) {
+        Map<String, Long> estadosOrdenados = new LinkedHashMap<>();
+        estadosGroupBy.entrySet()
+                .stream()
+                .sorted(Map.Entry.comparingByValue()
+                ).forEachOrdered(e -> estadosOrdenados.put(e.getKey(), e.getValue()));
+        return estadosOrdenados;
+    }
+
+    private static Map<String, Long> getEstadosGroupBy(List<String> estados) {
+        Map<String, Long> estadosGroupBy =
+                estados.stream()
+                        .collect(
+                                Collectors.groupingBy(
+                                        Function.identity(), Collectors.counting()
+                                )
+                        );
+        return estadosGroupBy;
+    }
+
+    private static List<String> getEstados(List<Candidate> candidates) {
+        List<String> estados = candidates.stream()
+                .map(Candidate::getEstado)
+                .collect(Collectors.toList());
+        return estados;
     }
 
     private static void mostraPercentagemDosCandidatosAndroidIosQa(List<Candidate> candidates) {
@@ -63,7 +109,7 @@ public class MainCandidate {
                 .filter(distinctByKey(Candidate::getEstado))
                 .count();
 
-        System.out.println("\nNúmero de estados distintos presentes na lista: " + numeroDeEstadosDistintos);
+        System.out.println("\n\nNúmero de estados distintos presentes na lista: " + numeroDeEstadosDistintos);
     }
 
     private static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {
