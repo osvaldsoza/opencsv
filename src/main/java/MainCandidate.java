@@ -1,3 +1,4 @@
+import com.opencsv.CSVWriter;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
@@ -15,6 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.Stream;
 
 public class MainCandidate {
 
@@ -28,20 +31,20 @@ public class MainCandidate {
 
         List<Candidate> candidates = converteCsvParaCandidate(pathArquivoEntrada);
 
-        //Todo:vorganizar casas decimais
         mostraPercentagemDosCandidatosAndroidIosQa(candidates);
 
-        //TODO:mostrar a idade média dos candidatos de QA
+        mostraIdadeMediaCandidatosQA(candidates);
 
         //TODO:mostrar o nome do estado e a quantidade de candidatos dos 2 estados com menos ocorrências
 
         mostraNumeroDeEstadosDistintos(candidates);
+
         ordenaPorOrdemAlfabetica(candidates);
 
         System.out.print("Informe o path onde quer salvar o arquivo: ");
         String pathArquivoSaida = path.nextLine();
 
-        salvaComoSortedAppAcademyCandidates(candidates,pathArquivoSaida);
+        salvaComoSortedAppAcademyCandidates(candidates, pathArquivoSaida);
 
     }
 
@@ -95,11 +98,12 @@ public class MainCandidate {
 
 
     private static void ordenaPorOrdemAlfabetica(List<Candidate> candidates) {
-        candidates.sort(Comparator.comparing(Candidate::getName));
+       candidates.sort(Comparator.comparing(Candidate::getName));
+
         System.out.println("\nGerando lista ordenada...");
     }
 
-    private static void salvaComoSortedAppAcademyCandidates(List<Candidate> candidates,String path) throws
+    private static void salvaComoSortedAppAcademyCandidates(List<Candidate> candidates, String path) throws
 
             CsvDataTypeMismatchException,
             CsvRequiredFieldEmptyException, IOException {
@@ -119,5 +123,14 @@ public class MainCandidate {
         writer.close();
 
         System.out.println("Lista ordenada salva como: Sorted_AppAcademy_Candidates.csv");
+    }
+
+    private static void mostraIdadeMediaCandidatosQA(List<Candidate> candidates) {
+        int mediaIdades = (int) candidates.stream()
+                .filter(candidate -> candidate.getVaga().startsWith("QA"))
+                .map(c -> c.getIdade().substring(0, c.getIdade().indexOf(" ")))
+                .mapToInt(n -> Integer.parseInt(n)).average().getAsDouble();
+
+        System.out.print("\nIdade dos candidatos de QA é: " + mediaIdades);
     }
 }
