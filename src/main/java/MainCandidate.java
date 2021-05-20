@@ -108,7 +108,7 @@ public class MainCandidate {
 
         try {
             writer = Files.newBufferedWriter(Paths.get(path + "Sorted_AppAcademy_Candidates.csv"));
-            writer.append("Nome;Vaga;Idade;Estado\n");
+            writer.append("\"Nome\";\"Vaga\";\"Idade\";\"Estado\"\n");
         } catch (IOException e) {
             e.printStackTrace();
         }
