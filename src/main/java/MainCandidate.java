@@ -1,4 +1,3 @@
-import com.opencsv.CSVWriter;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
@@ -16,8 +15,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
-import java.util.stream.Stream;
 
 public class MainCandidate {
 
@@ -98,7 +95,7 @@ public class MainCandidate {
 
 
     private static void ordenaPorOrdemAlfabetica(List<Candidate> candidates) {
-       candidates.sort(Comparator.comparing(Candidate::getName));
+        candidates.sort(Comparator.comparing(Candidate::getName));
 
         System.out.println("\nGerando lista ordenada...");
     }
@@ -111,13 +108,16 @@ public class MainCandidate {
 
         try {
             writer = Files.newBufferedWriter(Paths.get(path + "Sorted_AppAcademy_Candidates.csv"));
+            writer.append("Nome;Vaga;Idade;Estado\n");
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        StatefulBeanToCsv<Candidate> beanToCsv = new StatefulBeanToCsvBuilder(writer).build();
+        StatefulBeanToCsv<Candidate> beanToCsv = new StatefulBeanToCsvBuilder(writer)
+                .withSeparator(';')
+                .build();
 
-        beanToCsv.write(candidates);
+       beanToCsv.write(candidates);
 
         writer.flush();
         writer.close();

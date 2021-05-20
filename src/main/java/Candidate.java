@@ -1,7 +1,18 @@
+import com.opencsv.bean.CsvBindByName;
+import com.opencsv.bean.CsvBindByPosition;
+
+
 public class Candidate {
+    @CsvBindByPosition(position = 0)
     private String name;
+
+    @CsvBindByPosition(position = 1)
     private String vaga;
+
+    @CsvBindByPosition(position = 2)
     private String idade;
+
+    @CsvBindByPosition(position = 3)
     private String estado;
 
     public Candidate(String name, String vaga, String idade, String estado) {
