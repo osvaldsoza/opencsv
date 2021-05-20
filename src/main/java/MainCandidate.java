@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -20,18 +21,27 @@ public class MainCandidate {
     public static void main(String[] args) throws IOException,
             CsvDataTypeMismatchException,
             CsvRequiredFieldEmptyException {
+        Scanner path = new Scanner(System.in);
 
-        List<Candidate> candidates = converteCsvParaCandidate();
+        System.out.print("Informe o path o local do arquivo: ");
+        String pathArquivoEntrada = path.nextLine();
+
+        List<Candidate> candidates = converteCsvParaCandidate(pathArquivoEntrada);
 
         //Todo:vorganizar casas decimais
         mostraPercentagemDosCandidatosAndroidIosQa(candidates);
+
         //TODO:mostrar a idade média dos candidatos de QA
 
         //TODO:mostrar o nome do estado e a quantidade de candidatos dos 2 estados com menos ocorrências
 
         mostraNumeroDeEstadosDistintos(candidates);
         ordenaPorOrdemAlfabetica(candidates);
-        salvaComoSortedAppAcademyCandidates(candidates);
+
+        System.out.print("Informe o path onde quer salvar o arquivo: ");
+        String pathArquivoSaida = path.nextLine();
+
+        salvaComoSortedAppAcademyCandidates(candidates,pathArquivoSaida);
 
     }
 
@@ -47,7 +57,6 @@ public class MainCandidate {
                 .filter(c -> c.getVaga().startsWith("iOS"))
                 .count();
         float percentualIos = (qtdeIos * 100) / totalRegistro;
-
 
         float qtdeAQa = candidates.stream()
                 .filter(c -> c.getVaga().startsWith("QA"))
@@ -75,8 +84,8 @@ public class MainCandidate {
         return t -> map.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 
-    private static List<Candidate> converteCsvParaCandidate() throws IOException {
-        List<Candidate> candidates = Files.lines(Paths.get("AppAcademy_Candidates.csv"))
+    private static List<Candidate> converteCsvParaCandidate(String path) throws IOException {
+        List<Candidate> candidates = Files.lines(Paths.get(path))
                 .skip(1)
                 .map(line -> line.split(";"))
                 .map(col -> new Candidate(col[0], col[1], col[2], col[3])).collect(Collectors.toList());
@@ -90,13 +99,14 @@ public class MainCandidate {
         System.out.println("\nGerando lista ordenada...");
     }
 
-    private static void salvaComoSortedAppAcademyCandidates(List<Candidate> candidates) throws
+    private static void salvaComoSortedAppAcademyCandidates(List<Candidate> candidates,String path) throws
+
             CsvDataTypeMismatchException,
             CsvRequiredFieldEmptyException, IOException {
         Writer writer = null;
 
         try {
-            writer = Files.newBufferedWriter(Paths.get("Sorted_AppAcademy_Candidates.csv"));
+            writer = Files.newBufferedWriter(Paths.get(path + "Sorted_AppAcademy_Candidates.csv"));
         } catch (IOException e) {
             e.printStackTrace();
         }
