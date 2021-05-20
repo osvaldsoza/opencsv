@@ -10,7 +10,6 @@ import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -21,27 +20,15 @@ public class MainCandidate {
     public static void main(String[] args) throws IOException,
             CsvDataTypeMismatchException,
             CsvRequiredFieldEmptyException {
-        Scanner path = new Scanner(System.in);
 
-        System.out.print("Informe o path o local do arquivo: ");
-        String pathArquivoEntrada = path.nextLine();
-
-        List<Candidate> candidates = converteCsvParaCandidate(pathArquivoEntrada);
+        List<Candidate> candidates = converteCsvParaCandidate();
 
         mostraPercentagemDosCandidatosAndroidIosQa(candidates);
-
         mostraIdadeMediaCandidatosQA(candidates);
-
         //TODO:mostrar o nome do estado e a quantidade de candidatos dos 2 estados com menos ocorrências
-
         mostraNumeroDeEstadosDistintos(candidates);
-
         ordenaPorOrdemAlfabetica(candidates);
-
-        System.out.print("Informe o path onde quer salvar o arquivo: ");
-        String pathArquivoSaida = path.nextLine();
-
-        salvaComoSortedAppAcademyCandidates(candidates, pathArquivoSaida);
+        salvaComoSortedAppAcademyCandidates(candidates);
 
     }
 
@@ -73,7 +60,7 @@ public class MainCandidate {
 
     private static void mostraNumeroDeEstadosDistintos(List<Candidate> candidates) {
         int numeroDeEstadosDistintos = (int) candidates.stream()
-                .filter(distinctByKey(p -> p.getEstado()))
+                .filter(distinctByKey(Candidate::getEstado))
                 .count();
 
         System.out.println("\nNúmero de estados distintos presentes na lista: " + numeroDeEstadosDistintos);
@@ -84,30 +71,27 @@ public class MainCandidate {
         return t -> map.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 
-    private static List<Candidate> converteCsvParaCandidate(String path) throws IOException {
-        List<Candidate> candidates = Files.lines(Paths.get(path))
+    private static List<Candidate> converteCsvParaCandidate() throws IOException {
+        List<Candidate> candidates = Files.lines(Paths.get("AppAcademy_Candidates.csv"))
                 .skip(1)
                 .map(line -> line.split(";"))
                 .map(col -> new Candidate(col[0], col[1], col[2], col[3])).collect(Collectors.toList());
-
         return candidates;
     }
 
 
     private static void ordenaPorOrdemAlfabetica(List<Candidate> candidates) {
         candidates.sort(Comparator.comparing(Candidate::getName));
-
         System.out.println("\nGerando lista ordenada...");
     }
 
-    private static void salvaComoSortedAppAcademyCandidates(List<Candidate> candidates, String path) throws
-
+    private static void salvaComoSortedAppAcademyCandidates(List<Candidate> candidates) throws
             CsvDataTypeMismatchException,
             CsvRequiredFieldEmptyException, IOException {
         Writer writer = null;
 
         try {
-            writer = Files.newBufferedWriter(Paths.get(path + "Sorted_AppAcademy_Candidates.csv"));
+            writer = Files.newBufferedWriter(Paths.get("Sorted_AppAcademy_Candidates.csv"));
             writer.append("\"Nome\";\"Vaga\";\"Idade\";\"Estado\"\n");
         } catch (IOException e) {
             e.printStackTrace();
@@ -117,7 +101,7 @@ public class MainCandidate {
                 .withSeparator(';')
                 .build();
 
-       beanToCsv.write(candidates);
+        beanToCsv.write(candidates);
 
         writer.flush();
         writer.close();
